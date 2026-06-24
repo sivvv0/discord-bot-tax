@@ -11,30 +11,32 @@ class TaxEmbed {
     this.currencyName = options.currencyName ?? 'coins';
   }
 
-  /**
-   * Standard tax receipt embed
-   */
   receipt(result, user = null) {
     const embed = new EmbedBuilder()
       .setColor(this.color)
       .setTitle('💸 Transaction Receipt')
       .setDescription(`Tax calculated for your transfer`)
-      .addFields(
-        { name: '💵 Amount', value: formatCurrency(result.originalAmount, this.symbol), inline: true },
-        { name: '📉 Tax', value: formatCurrency(result.taxAmount, this.symbol), inline: true },
-        { name: '💚 You Receive', value: formatCurrency(result.netAmount, this.symbol), inline: true }
-      )
-      .addFields(
-        { name: '📋 Method', value: result.strategyName, inline: true },
-        { name: '📝 Details', value: result.description, inline: true }
-      )
       .setTimestamp()
       .setFooter({ text: 'Tax System v1.0' });
+
+    // Row 1: 3 inline fields
+    embed.addFields(
+      { name: '💵 Amount', value: formatCurrency(result.originalAmount, this.symbol), inline: true },
+      { name: '📉 Tax', value: formatCurrency(result.taxAmount, this.symbol), inline: true },
+      { name: '💚 You Receive', value: formatCurrency(result.netAmount, this.symbol), inline: true }
+    );
+
+    // Row 2: 2 inline fields
+    embed.addFields(
+      { name: '📋 Method', value: result.strategyName, inline: true },
+      { name: '📝 Details', value: result.description, inline: true }
+    );
 
     if (user) {
       embed.setAuthor({ name: user.tag, iconURL: user.displayAvatarURL() });
     }
 
+    // Row 3: 1 inline field (rate)
     if (result.rateApplied !== null) {
       embed.addFields({
         name: '📊 Effective Rate',
@@ -46,9 +48,6 @@ class TaxEmbed {
     return embed;
   }
 
-  /**
-   * Confirmation embed with buttons
-   */
   confirm(result, user = null) {
     const embed = this.receipt(result, user);
     embed.setTitle('⚠️ Confirm Transaction')
@@ -68,9 +67,6 @@ class TaxEmbed {
     return { embeds: [embed], components: [row] };
   }
 
-  /**
-   * Tax breakdown for complex strategies
-   */
   breakdown(result, user = null) {
     const embed = this.receipt(result, user);
     embed.setTitle('📊 Detailed Tax Breakdown');
@@ -80,7 +76,7 @@ class TaxEmbed {
         `**${i + 1}.** \`${b.range}\` at ${b.rate} → ${formatCurrency(b.tax, this.symbol)}`
       );
       embed.addFields({
-        name: 'Bracket Details',
+        name: '📈 Tax Breakdown',
         value: lines.join('\n') || 'No details'
       });
     }
@@ -95,9 +91,6 @@ class TaxEmbed {
     return embed;
   }
 
-  /**
-   * Error embed
-   */
   error(message) {
     return new EmbedBuilder()
       .setColor(0xFF4444)
@@ -106,9 +99,6 @@ class TaxEmbed {
       .setTimestamp();
   }
 
-  /**
-   * Tax-free notification
-   */
   taxFree(amount) {
     return new EmbedBuilder()
       .setColor(0x44FF44)
