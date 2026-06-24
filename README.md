@@ -153,3 +153,91 @@ const engine = new TaxEngine({
 | **`allowNegative`** | `boolean` | `false` | Allow negative amounts |
 | **`decimals`** | `number` | `2` | Decimal places for rounding |
 | **`onCalculate`** | `function` | `null` | Callback after calculation |
+* Engine Methods
+```js
+// Calculate tax
+const result = engine.calculate(1000, {
+  userId: '123456',
+  guildId: '789012',
+  isPremium: true,
+  customData: { anything: 'here' }
+});
+
+// Add rule later
+engine.addRule({
+  condition: (amount, ctx) => ctx.userId === 'OWNER_ID',
+  strategy: new FlatTax({ amount: 0 }),
+  priority: 999
+});
+
+// Remove all rules
+engine.clearRules();
+
+// Change default
+engine.setDefault(new FlatTax({ amount: 10 }));
+
+// Static quick-calculate (no engine instance needed)
+const { TaxEngine } = require('discord-bot-tax');
+const result = TaxEngine.quick(1000, new PercentageTax({ rate: 0.05 }));
+```
+# 🎨 Discord Embeds
+```js
+const { TaxEmbed } = require('discord-bot-tax');
+
+const taxEmbed = new TaxEmbed({
+  symbol: '🪙',        // Currency emoji
+  color: 0x00AA88,     // Embed color
+  currencyName: 'coins'
+});
+
+// Standard receipt
+const receipt = taxEmbed.receipt(result, interaction.user);
+
+// With confirmation buttons
+const { embeds, components } = taxEmbed.confirm(result, interaction.user);
+await interaction.reply({ embeds, components });
+
+// Detailed breakdown (for Progressive/Tiered)
+const breakdown = taxEmbed.breakdown(result, interaction.user);
+
+// Tax-free notification
+const free = taxEmbed.taxFree(100);
+
+// Error
+const error = taxEmbed.error('Insufficient funds');
+```
+# 🔧 Custom Strategies
+Build your own strategy by implementing this interface:
+```js
+class MyCustomTax {
+  constructor(options) {
+    this.name = 'MyCustomTax';
+    // your config
+  }
+
+  calculate(amount, context) {
+    // Your logic here
+    const taxAmount = /* calculate */;
+
+    return {
+      originalAmount: amount,
+      taxAmount: taxAmount,
+      netAmount: amount - taxAmount,
+      rateApplied: null, // or your rate
+      strategyName: this.name,
+      description: 'My custom tax applied',
+      timestamp: new Date(),
+      metadata: {} // any extra data
+    };
+  }
+
+  getDescription() {
+    return 'Description of my tax';
+  }
+}
+
+// Use it
+const engine = new TaxEngine({
+  defaultStrategy: new MyCustomTax({ /* options */ })
+});
+```
