@@ -108,3 +108,47 @@ const strategy = new TieredTax({
 |--------|------|-------------|
 | `tiers` | `Array` | Each tier needs `min`, `max`, `value`, `type` |
 | `type` | `'flat' \| 'percentage'` | How `value` is applied |
+# 🏛️ TaxEngine — The Brain
+```js
+const { TaxEngine, PercentageTax, FlatTax } = require('discord-bot-tax');
+
+const engine = new TaxEngine({
+  // Default when no rules match
+  defaultStrategy: new PercentageTax({ rate: 0.03 }),
+
+  // Conditional rules (evaluated in priority order)
+  rules: [
+    {
+      condition: (amount, context) => context.isPremium,
+      strategy: new PercentageTax({ rate: 0.01 }),
+      priority: 100
+    },
+    {
+      condition: (amount) => amount >= 10000,
+      strategy: new FlatTax({ amount: 500 }),
+      priority: 50
+    }
+  ],
+
+  // Validation
+  minAmount: 1,
+  maxAmount: 1000000,
+  allowNegative: false,
+  decimals: 2,
+
+  // Hook for logging
+  onCalculate: (result, context) => {
+    console.log(`[TAX] ${context.userId} paid ${result.taxAmount}`);
+  }
+});
+```
+* Engine Options
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| **`defaultStrategy`** | `TaxStrategy` | `null` | Fallback strategy |
+| **`rules`** | `Array<TaxRule>` | `[]` | Conditional tax rules |
+| **`minAmount`** | `number` | `null` | Minimum transaction |
+| **`maxAmount`** | `number` | `null` | Maximum transaction |
+| **`allowNegative`** | `boolean` | `false` | Allow negative amounts |
+| **`decimals`** | `number` | `2` | Decimal places for rounding |
+| **`onCalculate`** | `function` | `null` | Callback after calculation |
