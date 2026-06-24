@@ -143,6 +143,7 @@ const engine = new TaxEngine({
 });
 ```
 * Engine Options
+
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
 | **`defaultStrategy`** | `TaxStrategy` | `null` | Fallback strategy |
