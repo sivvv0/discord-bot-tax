@@ -1,0 +1,31 @@
+{
+  "name": "discord-bot-tax",
+  "version": "1.0.0",
+  "description": "Transaction tax/fee system for discord.js economy bots",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "node test.js"
+  },
+  "keywords": [
+    "discord",
+    "discord.js",
+    "bot",
+    "economy",
+    "tax",
+    "fee",
+    "currency",
+    "transaction"
+  ],
+  "author": "",
+  "license": "MIT",
+  "peerDependencies": {
+    "discord.js": "^14.0.0"
+  },
+  "engines": {
+    "node": ">=16.9.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sivvv0/discord-bot-tax"
+  }
+}
