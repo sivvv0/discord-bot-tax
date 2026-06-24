@@ -58,3 +58,53 @@ const strategy = new FlatTax({ amount: 10, allowExceed: true });
 |--------|------|---------|-------------|
 | `amount` | `number` | `0` | Fixed fee amount |
 | `allowExceed` | `boolean` | `false` | Allow tax > transaction amount |
+2. PercentageTax — Percent of transaction
+```js
+const { PercentageTax } = require('discord-bot-tax');
+
+// 5% tax, minimum 1 coin, maximum 500 coins
+const strategy = new PercentageTax({
+  rate: 0.05,      // 5%
+  minTax: 1,       // At least 1 coin
+  maxTax: 500      // At most 500 coins
+});
+```
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `rate` | `number` | `0` | Tax rate (0 to 1) |
+| `minTax` | `number` | `null` | Minimum tax amount |
+| `maxTax` | `number` | `null` | Maximum tax amount |
+3. ProgressiveTax — Tax brackets (like income tax)
+```js
+const { ProgressiveTax } = require('discord-bot-tax');
+
+// Real-world style brackets
+const strategy = new ProgressiveTax({
+  brackets: [
+    [100, 0.00],    // 0-100: 0% tax
+    [500, 0.05],    // 100-500: 5% tax
+    [1000, 0.10],   // 500-1000: 10% tax
+  ],
+  cumulative: true  // Amounts above 1000 use last bracket rate
+});
+```
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `brackets` | `Array<[number, number]>` | `[]` | `[maxAmount, rate]` pairs |
+| `cumulative` | `boolean` | `false` | Apply last bracket to amounts above all brackets |
+4. TieredTax — Different rules per amount range
+```js
+const { TieredTax } = require('discord-bot-tax');
+
+const strategy = new TieredTax({
+  tiers: [
+    { min: 0, max: 100, value: 2, type: 'flat' },        // 0-100: flat 2 coins
+    { min: 100, max: 1000, value: 0.03, type: 'percentage' }, // 100-1000: 3%
+    { min: 1000, max: Infinity, value: 0.01, type: 'percentage' } // 1000+: 1%
+  ]
+});
+```
+| Option | Type | Description |
+|--------|------|-------------|
+| `tiers` | `Array` | Each tier needs `min`, `max`, `value`, `type` |
+| `type` | `'flat' \| 'percentage'` | How `value` is applied |
