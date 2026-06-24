@@ -349,6 +349,13 @@ test('allows negative with flag', () => {
   
   const result = engine.calculate(-50);
   assert.strictEqual(result.originalAmount, -50);
+  assert.strictEqual(result.taxAmount, 0);
+  assert.strictEqual(result.netAmount, -50);
+});
+
+  
+  const result = engine.calculate(-50);
+  assert.strictEqual(result.originalAmount, -50);
 });
 
 test('decimal rounding', () => {
