@@ -241,3 +241,117 @@ const engine = new TaxEngine({
   defaultStrategy: new MyCustomTax({ /* options */ })
 });
 ```
+* Required return object:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `originalAmount` | `number` | Input amount |
+| `taxAmount` | `number` | Tax deducted |
+| `netAmount` | `number` | Amount after tax |
+| `rateApplied` | `number \| null` | Effective rate (optional) |
+| `strategyName` | `string` | Strategy identifier |
+| `description` | `string` | Human-readable description |
+| `timestamp` | `Date` | Calculation time |
+| `metadata` | `object` | Extra data (optional) |
+# 📝 Full Discord Command Example
+```js
+const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
+const { TaxEngine, PercentageTax, ProgressiveTax, TaxEmbed } = require('discord-bot-tax');
+
+const engine = new TaxEngine({
+  rules: [
+    {
+      condition: (amount, ctx) => ctx.member?.permissions.has(PermissionFlagsBits.Administrator),
+      strategy: new PercentageTax({ rate: 0 }),
+      priority: 1000
+    },
+    {
+      condition: (amount) => amount >= 50000,
+      strategy: new ProgressiveTax({
+        brackets: [[50000, 0.05], [100000, 0.10], [500000, 0.15]],
+        cumulative: true
+      }),
+      priority: 100
+    }
+  ],
+  defaultStrategy: new PercentageTax({ rate: 0.03, minTax: 1 }),
+  minAmount: 1,
+  onCalculate: (result, ctx) => {
+    // Save to your database
+    db.logTax(ctx.userId, result);
+  }
+});
+
+module.exports = {
+  data: new SlashCommandBuilder()
+    .setName('pay')
+    .setDescription('Pay another user')
+    .addUserOption(o => o.setName('user').setDescription('Recipient').setRequired(true))
+    .addIntegerOption(o => o.setName('amount').setDescription('Amount').setRequired(true)),
+
+  async execute(interaction) {
+    const target = interaction.options.getUser('user');
+    const amount = interaction.options.getInteger('amount');
+
+    const result = engine.calculate(amount, {
+      userId: interaction.user.id,
+      member: interaction.member,
+      guildId: interaction.guildId
+    });
+
+    // Deduct from sender, add net to receiver, tax to bank
+    await db.removeBalance(interaction.user.id, result.originalAmount);
+    await db.addBalance(target.id, result.netAmount);
+    await db.addToBank(result.taxAmount);
+
+    const embed = new TaxEmbed({ symbol: '💰' }).receipt(result, interaction.user);
+    await interaction.reply({ embeds: [embed] });
+  }
+};
+```
+**📊 Result Object**
+```js
+const result = engine.calculate(1000);
+
+// result:
+{
+  originalAmount: 1000,
+  taxAmount: 50,
+  netAmount: 950,
+  rateApplied: 0.05,
+  strategyName: 'PercentageTax',
+  description: '5.0% tax applied',
+  timestamp: 2026-06-24T23:55:00.000Z,
+  metadata: {
+    effectiveRate: 0.05
+  }
+}
+```
+**🛠️ Utility Functions**
+```js
+const { formatCurrency, taxSummary, validateAmount, isPremium } = require('discord-bot-tax');
+
+// Format: "🪙 1,234.56"
+formatCurrency(1234.56, '🪙'); 
+
+// Simple text summary
+taxSummary(result, '🪙');
+// "**Amount:** 🪙 1,000.00
+//  **Tax:** 🪙 50.00 (5.0%)
+//  **Net:** 🪙 950.00
+//  *5.0% tax applied*"
+
+// Validate amount
+validateAmount(100, { min: 1, max: 10000 }); // throws if invalid
+
+// Check premium (with your Set/DB)
+isPremium(userId, premiumUserSet);
+```
+
+# 🔄 Version History
+| Version | Changes |
+|---------|---------|
+| **`1.0.0`** | Initial release — Flat, Percentage, Progressive, Tiered taxes + Discord embeds |
+
+**🤝 Contributing** 
+Pull requests welcome! For custom strategy ideas or `Discord.js` version bumps, open an issue.
