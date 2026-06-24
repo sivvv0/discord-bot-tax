@@ -23,13 +23,26 @@ class TaxEngine {
       throw new Error('Amount cannot be negative');
     }
 
-    // Only check min/max for non-null values
     if (this.minAmount !== null && amount < this.minAmount) {
       throw new Error(`Amount must be at least ${this.minAmount}`);
     }
 
     if (this.maxAmount !== null && amount > this.maxAmount) {
       throw new Error(`Amount cannot exceed ${this.maxAmount}`);
+    }
+
+    // Negative amounts: skip tax calculation entirely
+    if (amount < 0) {
+      return {
+        originalAmount: amount,
+        taxAmount: 0,
+        netAmount: this.round(amount),
+        rateApplied: null,
+        strategyName: 'None',
+        description: 'Negative amount - no tax applied',
+        timestamp: new Date(),
+        metadata: { negative: true }
+      };
     }
 
     let strategy = null;
