@@ -17,23 +17,14 @@ function validateAmount(amount, options = {}) {
   return true;
 }
 
-/**
- * Check if user has a specific role (for Discord)
- */
 function hasRole(member, roleId) {
   return member.roles.cache.has(roleId);
 }
 
-/**
- * Check if user is bot admin/owner
- */
 function isAdmin(member) {
   return member.permissions.has('Administrator') || member.id === member.guild.ownerId;
 }
 
-/**
- * Check if user is premium (from your database)
- */
 function isPremium(userId, premiumUsers = new Set()) {
   return premiumUsers.has(userId);
 }
