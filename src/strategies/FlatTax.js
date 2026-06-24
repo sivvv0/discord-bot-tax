@@ -1,6 +1,5 @@
 /**
  * FlatTax - Fixed fee per transaction
- * Example: Every transfer costs 5 coins no matter the amount
  */
 
 class FlatTax {
@@ -21,20 +20,21 @@ class FlatTax {
 
     let tax = this.amount;
 
-    if (!this.allowExceed && tax > amount) {
+    // Only cap if allowExceed is NOT explicitly true AND tax would exceed amount
+    if (this.allowExceed !== true && tax > amount) {
       tax = amount;
     }
 
     return {
       originalAmount: amount,
       taxAmount: tax,
-      netAmount: Math.max(0, amount - tax),
+      netAmount: amount - tax,
       rateApplied: null,
       strategyName: this.name,
       description: `Flat fee of ${this.amount} coins`,
       timestamp: new Date(),
       metadata: {
-        wasCapped: !this.allowExceed && this.amount > amount
+        wasCapped: this.allowExceed !== true && this.amount > amount
       }
     };
   }
