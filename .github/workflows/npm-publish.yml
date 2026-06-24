@@ -19,6 +19,11 @@ jobs:
       - run: echo "Ready to publish!"
       
       # Uncomment after testing:
-       - run: npm publish --access public
-         env:
-           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      # - run: npm publish --access public
+      #   env:
+      #     NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      
+      # OR uncomment these lines to actually publish:
+      - run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
