@@ -1,7 +1,7 @@
 {
   "name": "discord-bot-tax",
   "version": "0.0.1",
-  "description": "Transaction tax/fee system for discord.js economy bots",
+  "description": "Flexible transaction tax & fee system for discord.js economy bots. Calculate taxes, fees, and deductions on user-to-user transfers, shop purchases, gambling, and any currency transaction.",
   "main": "src/index.js",
   "scripts": {
     "test": "node test.js"
@@ -10,9 +10,13 @@
     "discord",
     "discord.js",
     "bot",
+    "gambling",
     "economy",
     "tax",
     "fee",
+    "owo",
+    "farm",
+    "s1vann",
     "currency",
     "transaction"
   ],
